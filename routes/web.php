@@ -34,6 +34,9 @@ Route::middleware(['auth'])->group(function () {
       Route::get('UsersReport', [UserController::class, 'report'])->name('users.report');
       Route::get('/report/pdf', [UserController::class, 'exportPdf'])->name('report.pdf');
       Route::get('/report/excel', [UserController::class, 'exportExcel'])->name('report.excel');
+      Route::get('/orders/report/pdf', [OrderController::class, 'exportPdf'])->name('orders.report.pdf');
+      Route::get('/orders/report/excel', [OrderController::class, 'exportExcel'])->name('orders.report.excel');
+
   });
 
   Route::middleware('permission:area_edit')->group(function () {

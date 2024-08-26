@@ -3,7 +3,10 @@
 @section('content')
     <div class="container">
         <h1>Orders Report</h1>
-
+        <div class="mb-3">
+            <a href="{{ route('orders.report.pdf') }}" class="btn btn-danger">Export to PDF</a>
+            <a href="{{ route('orders.report.excel') }}" class="btn btn-success">Export to Excel</a>
+        </div>
         <!-- Add your report content here -->
         <div class="card">
             <div class="card-body">
@@ -24,9 +27,9 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $order->id }}</td>
-                                <td>{{ $order->user_id }}</td>
+                                <td>{{ $order->user->email }}</td>
                                 <td>{{ $order->status }}</td>
-                                <td>${{ $order->total }}</td>
+                                <td>${{ $order->total_amount }}</td>
                                 <td>{{ $order->order_date}}</td>
                             </tr>
                         @endforeach

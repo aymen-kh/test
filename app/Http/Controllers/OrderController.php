@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use App\Models\OrderItem;
 use App\Models\Table;
-use Barryvdh\DomPDF\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
@@ -437,9 +437,19 @@ public function cancelOrder(Order $order)
 public function ordersReport()
 {
     // Fetch orders data or any other logic to prepare the report
-    $orders = Order::all(); // This is just an example, adjust as needed
+    $orders = Order::with('user')->get();    // This is just an example, adjust as needed
 
     return view('orders.report', compact('orders'));
 }
+public function exportPdf()
+{
+    $orders = Order::with('user')->get();
+    $pdf =PDF::loadView('orders.report_pdf', compact('orders'));
+    return $pdf->download('orders_report.pdf');
+}
 
+public function exportExcel()
+{
+    return Excel::download(new OrdersExport, 'orders_report.xlsx');
+}
 } 

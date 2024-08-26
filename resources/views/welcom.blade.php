@@ -128,7 +128,8 @@
         <div class="hero-content">
             <h1 class="display-4"><i>Welcome to Roxi</i></h1>
             <p class="lead">Delicious food and great service in a cozy setting.</p>
-         @cannot('order_edit')   <a href="{{ route('orders.takeorder') }}" class="btn btn-light btn-lg">Order Now</a>@endcannot
+            @cannot('order_edit')   <a href="{{ route('orders.takeorder') }}" class="btn btn-light btn-lg">Order Now</a>@endcannot
+            @role('Admin')   <a href="{{ route('orders.takeorder') }}" class="btn btn-light btn-lg">Order Now</a>@endrole
         </div>
     </header>
 

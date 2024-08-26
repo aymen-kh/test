@@ -11,7 +11,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{route('menus.index')}}">Menus</a>
             </li>
-            @cannot('order_edit')
+           @cannot('order_edit')
             <li class="nav-item">
                 <button id="openModalBtn" class="btn btn-outline-success my-2 my-sm-0 ml-2 btn-floating" data-toggle="modal" data-target="#reservationModal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-plus" viewBox="0 0 16 16">
@@ -21,6 +21,16 @@
                 </button>
             </li>
             @endcannot
+            @role('Admin')
+            <li class="nav-item">
+                <button id="openModalBtn" class="btn btn-outline-success my-2 my-sm-0 ml-2 btn-floating" data-toggle="modal" data-target="#reservationModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-plus" viewBox="0 0 16 16">
+                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h9V.5a.5.5 0 0 1 1 0V1h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H1a.5.5 0 0 1-.5-.5V1A.5.5 0 0 1 1 0h1v.5a.5.5 0 0 1 .5-.5zm-1 2v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2H2.5zM8 8.5a.5.5 0 0 1 .5-.5h2V6a.5.5 0 0 1 1 0v2h2a.5.5 0 0 1 0 1h-2v2a.5.5 0 0 1-1 0v-2H8.5a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                    Reservation
+                </button>
+            </li>
+            @endrole
             @can('order_edit')
             <li class="nav-item">
                 <a href="{{ route('pos') }}" class="btn btn-outline-primary my-2 my-sm-0 ml-2 btn-floating">

@@ -1,0 +1,18 @@
+[33mbf0a0c8[m[33m ([m[1;36mHEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to bf0a0c8
+[33m00040ec[m HEAD@{1}: checkout: moving from main to 00040ec
+[33mbf0a0c8[m[33m ([m[1;36mHEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{2}: reset: moving to bf0a0c8
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{3}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{4}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{5}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{6}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{7}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{8}: checkout: moving from f8a8bf98762a5612baf5d6d5e2f62b4b6d02c156 to main
+[33mf8a8bf9[m HEAD@{9}: commit: Y
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{10}: checkout: moving from main to 54a5cfd7708c0d10663cf9530120db6c7b070a8a
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{11}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{12}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{13}: checkout: moving from main to main
+[33m54a5cfd[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{14}: commit: Initial commit of all files to the repository
+[33m00040ec[m HEAD@{15}: commit: Install Breeze
+[33mbf0a0c8[m[33m ([m[1;36mHEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{16}: Branch: renamed refs/heads/master to refs/heads/main
+[33mbf0a0c8[m[33m ([m[1;36mHEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{18}: commit (initial): Set up a fresh Laravel app

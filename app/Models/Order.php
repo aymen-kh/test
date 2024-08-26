@@ -36,7 +36,11 @@ public function getStatusLabelAttribute()
     return $statusLabels[$this->status] ?? 'Unknown';
 }
 
-    
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
     public function items()
     {
         return $this->belongsToMany(Item::class, 'order_item', 'order_id', 'item_id')
