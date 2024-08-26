@@ -18,10 +18,11 @@ class AdminSeeder extends Seeder
        $user= User::create([
 
             'name' => 'admin',
-            'email' => 'a@gmail.com',
+            'surname' => 'test',
+            'email' => 'admin@gmail.com',
             'email_verified_at' => now(),
             'password' => '123',
            
-        ])->assignRole('Super Admin');
+        ])->assignRole('Admin');
     }
 }

@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm" >
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
     <a class="navbar-brand" href="{{ route('welcom') }}">Roxi</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -11,6 +11,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{route('menus.index')}}">Menus</a>
             </li>
+            @cannot('order_edit')
             <li class="nav-item">
                 <button id="openModalBtn" class="btn btn-outline-success my-2 my-sm-0 ml-2 btn-floating" data-toggle="modal" data-target="#reservationModal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-plus" viewBox="0 0 16 16">
@@ -19,10 +20,24 @@
                     Reservation
                 </button>
             </li>
+            @endcannot
+            @can('order_edit')
+            <li class="nav-item">
+                <a href="{{ route('pos') }}" class="btn btn-outline-primary my-2 my-sm-0 ml-2 btn-floating">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cash-stack" viewBox="0 0 16 16">
+                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2H0zm16 3v3a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V7h16zm0-1H0V5h16v1z"/>
+                        <path d="M2 11h12a1 1 0 0 0 1-1H1a1 1 0 0 0 1 1z"/>
+                        <path d="M0 12h16v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-1zm8-5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>
+                    </svg>
+                    POS
+                </a>
+            </li>
+            @endcan
         </ul>
         @guest
             <!-- User is not logged in -->
             <a class="btn btn-outline-primary ml-2" href="{{ route('register') }}">Register</a>
+            <a class="btn btn-secondary ml-2" href="{{ route('login') }}">Login</a>
         @else
             <!-- User is logged in -->
             <ul class="navbar-nav ml-auto">
@@ -34,7 +49,15 @@
                         <span class="d-none d-md-inline">Profile</span>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="profileDropdown">
-                        <a class="dropdown-item" href="{{ route('orders.index') }}">My Orders</a>
+                        <a class="dropdown-item" href="{{ route('orders.index') }}">@cannot('order_edit')My @endcannot Orders</a>
+                        @can('reservation_show')
+                        <a class="dropdown-item" href="{{ route('reservations.index') }}">My Reservations</a>
+                    @endcan
+                    
+                    @can('table_edit')
+                        <a class="dropdown-item" href="{{ route('reservations.index') }}">@cannot('table_edit') My @endcannot Reservations</a>
+                    @endcan
+                    
                         <a class="dropdown-item" href="{{ route('profile.edit') }}">Edit Profile</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('logout') }}" 
@@ -47,6 +70,7 @@
                         </form>
                     </div>
                 </li>
+               
             </ul>
         @endguest
     </div>

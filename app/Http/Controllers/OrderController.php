@@ -1,14 +1,21 @@
 <?php
 
 namespace App\Http\Controllers;
+
+
+use App\Models\Area;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Item;
+use App\Models\Menu;
 use App\Models\Order;
 
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use App\Models\OrderItem;
+use App\Models\Table;
+use Barryvdh\DomPDF\PDF;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
@@ -17,45 +24,40 @@ class OrderController extends Controller
 {
     public function show($id)
 {
+    
     $order = Order::findOrFail($id);
-    return view('orders.show', compact('order'));
+    if ((Auth::user()->hasRole(['Admin', 'Chef','Server','Deliverer']))|| ($order->user_id==Auth::user()->id)) {
+    
+        return view('orders.show', compact('order')); }
+
+   
+     abort(403);
+
+  
+
+    
+
 }
 
-    // Show checkout page with cart details
-    public function showCheckoutForm()
-    { 
-        $cartItems = json_decode($_COOKIE['cart'] ?? '[]', true);
-            $cart = [];
-        $total = 0;
-
-        foreach ($cartItems as $item) {
-            $itemData = Item::find($item['id']);
-            if ($itemData) {
-                $cart[] = [
-                    'id' => $item['id'],
-                    'name' => $itemData->name,
-                    'quantity' => $item['quantity'],
-                    'price' => $itemData->price*100,
-                    'image'=>$itemData->image,
-                    'custom_description' => $item['custom_description']
-                ];
-                $total += $item['quantity'] * $itemData->price;
-            }
-        }
-   
-        return view('checkout', compact('cart', 'total'));
-    }
-
-    // Process checkout and payment
-
-
-
-
+ 
     public function index()
     {
         // Fetch orders for the authenticated user
-        $orders = Order::where('client_id', Auth::id())->orderBy('order_date', 'asc')->get();
+        $roles = ['Admin', 'Server', 'Chef'];
 
+        if (Auth::user()->hasRole(['Admin', 'Chef','Server'])) {            // Fetch all orders if the user has the permission
+            $orders = Order::orderBy('created_at', 'desc')->get();
+        }
+        elseif( Auth::user()->hasRole('Deliverer')){
+            $orders = Order::where('status', 'in_delivery')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        }
+         else {
+            // Fetch orders for the authenticated user if they do not have the permission
+            $orders = Order::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        }
         // Pass orders to the view
         return view('orders.index', compact('orders'));
     }
@@ -70,7 +72,7 @@ class OrderController extends Controller
         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
 
         $cartItems = json_decode($_COOKIE['cart'] ?? '[]', true);
-
+    
       //  return view('checkout1', compact('cartItems'));
      $lineItems = [];
         $totalPrice = 0;
@@ -85,13 +87,15 @@ class OrderController extends Controller
                       
                      //   'images' => [$product->image]
                     ],
-                    'unit_amount' => $product['price']*100,
+                    'unit_amount' => $product['price']*20,
                 ],
                 'quantity' => $product['quantity'],
+                
               
             ];
         }
-    
+       
+  //  dd( $cartItems[0]);
      
       $session = \Stripe\Checkout\Session::create([
             'line_items' => $lineItems,
@@ -105,7 +109,7 @@ class OrderController extends Controller
       
         $user=Auth::user();
  //      dd($user->id);
-        $paymentMethod = $request->input('payment_method');
+       // $paymentMethod = $request->input('payment_method');
        $order = new Order();
      //  $order->id=$session->id;
         $order->status = 'unpaid';
@@ -113,10 +117,10 @@ class OrderController extends Controller
         $orderDate = date('Y-m-d H:i:s', $createdTimestamp);    
         $order->order_date= $orderDate;
         $order->total_amount = $totalPrice;
-        $order->payment_method=$paymentMethod;
+        $order->payment_method='card';
         $order->order_type=$cartItems[0]['order_type'];
-        $order->delivery_address = $user->location;
-        $order->client_id=$user->id;
+        $order->delivery_address = $cartItems[0]["location"];
+        $order->user_id=$user->id;
         $order->stripe_session_id = $session->id;
         $order->save(); 
        
@@ -158,7 +162,7 @@ public function success(Request $request)
         }
 
         Cookie::queue(Cookie::forget('cart'));
-        $orders = Order::where('client_id', Auth::id())->orderBy('order_date', 'desc')->get();
+        $orders = Order::where('user_id', Auth::id())->orderBy('order_date', 'desc')->get();
 
         // Pass orders to the view
         return view('orders.index', compact('orders'));
@@ -167,108 +171,88 @@ public function success(Request $request)
         throw new NotFoundHttpException();
     }
 }
-
-    /*public function success(Request $request)
-    {
-        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
-        $sessionId = $request->get('session_id');
-
-        try {
-            $session = \Stripe\Checkout\Session::retrieve($sessionId);
-            if (!$session) {
-                throw new NotFoundHttpException;
-            }
-            $customer = \Stripe\Customer::retrieve($session->customer);
-            $order = Order::where('stripe_session_id ', $session->id)->first();
-           
-            if (!$order) {
-                throw new NotFoundHttpException();
-            }
-            if ($order->status === 'unpaid') {
-                $order->status = 'paid';
-                $order->save();
-            }
-            $response = view('items.index');
-            Cookie::queue(Cookie::forget('cart'));
-          //return view('areas.index');
-           
-          //  return view('product.checkout-success', compact('customer'));
-        } catch (\Exception $e) {
-            throw new NotFoundHttpException();
-        }
-
-    }
-*/
-
     public function cancel()
     {
         return redirect(URL::previous());
     }
 
-      /*  if (!Auth::check()) {
-            return redirect()->route('register')->with('redirectTo', url()->previous());
-        }
+     
+        public function store(Request $request)
+        {
+          
+            $validated = $request->validate([
+                
+                'user_id' => 'required|integer|exists:users,id',
+                'order_date' => 'nullable|date',
+                'status' => 'nullable|string|in:unpaid,paid,preparing,in_delivery,completed,cancelled',
+                'order_type' => 'required|string',
+                'total_amount' => 'required|numeric',
+                'delivery_address' => 'nullable|string|max:255',
+                'table_id' => 'nullable|integer|exists:tables,id',
+                'payment_method' => 'nullable|string',
+                'stripe_session_id' => 'nullable|string',
+                'items' => 'nullable|array',
+                'items.*.id' => 'required|integer|exists:items,id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.custom_description' => 'nullable|string',
+            ]);
 
-        // Validate the request data
-        $validatedData = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-            'address' => 'required|string',
-            'order_type' => 'required|string', // Add validation for order_type
-            'payment_method' => 'required|string',
-        ]);
+
+            $order = new Order();
+            $order->user_id = $validated['user_id'];
+            $order->order_type = $validated['order_type'];
+            $order->status = 'preparing';
     
-        // Process payment, save order, etc.
-        // For example, you can use a payment gateway like Stripe or PayPal
-        // $payment = Payment::create($validatedData);
-    
-        // Save the order
-        $order = Order::create([
-            'client_id' => auth()->id(), // assuming you're using authentication
-            'order_date' => now(),
-            'status' => 'pending',
-            'order_type' => $request->input('order_type'),
-            'total_amount' => $request->input('total'),
-            'delivery_address' => $request->input('address'),
-            'table_id' => null, // You can set this if you have table-based ordering
-        ]);
-    
-        // Save the order items
-        $cartItems = $request->input('cart_items');
-        $cartItemsArray = explode(';', $cartItems);
-        foreach ($cartItemsArray as $item) {
-            if (!empty($item)) {
-                list($id, $quantity, $customDescription) = explode(':', $item);
-                $itemData = Item::find($id);
-                if ($itemData) {
-                    $order->items()->attach($id, [
-                        'quantity' => $quantity,
-                        'price' => $itemData->price,
-                        'custom_description' => $customDescription,
+          //  $order->order_date=now();
+
+           $order->order_date = $validated['order_date'] ?? now();
+         
+         $order->delivery_address = $validated['delivery_address'] ?? null;
+
+            $order->table_id = $validated['table_id'] ?? null;
+            $order->payment_method = $validated['payment_method'];
+            $order->total_amount = $validated['total_amount'];
+        
+           $order->save();
+           if   ($validated['order_type']=='dine_in'){
+            if (!(is_null($order->table_id))){
+           Table::where('id', $validated['table_id'])->update(['status' => 'not available']);}
+            }
+            if ($request->has('items')) {
+                foreach ($request->input('items') as $item) {
+                    $order->items()->attach($item['id'], [
+                        'quantity' => $item['quantity'],
+                        'custom_description' => $item['custom_description'] ?? '',
                     ]);
                 }
             }
-        }
-    
-        // Clear cart
-        $response = redirect()->route('checkout1')->with('success', 'Order placed successfully!');
-        $response->cookie('cart', json_encode([]), -1); // Clear the cart cookie
-        return $response;
-        */     
+            if (Auth::user()->hasRole(['Server','Admin'])) {
+                $pdf = app(PDF::class);
+                $pdf->loadView('orders.invoice', compact('order'));
         
-    
+                // Generate the PDF content as a stream
+                $pdfContent = $pdf->output();
+                
+                // Store PDF content in the session for later retrieval
+                session(['pdf_content' => $pdfContent]);
+                // Return a view to handle the iframe display and redirection
+                return view('orders.invoice_redirect', [
+                    'pdfContent' => base64_encode($pdfContent)
+                ]);
+            }
 
-    // Show success page after order is placed
-  /*  public function checkoutSuccess()
-    {
-        return view('checkout1');
-    }
-    public function cancel()
-    {
-        return view('checkout1');
-    }
-*/
+            return redirect()->route('orders.index')->with('success', 'Order created successfully.');
+        }
+        public function edit(Order $order)
+        {
+            $items = Item::all(); // Load items for the order edit form
+            return view('orders.edit', compact('order', 'items'));
+        }
+        public function clientOrder(Order $order)
+        {
+            $categories = Category::with('items')->get(); 
+            return view('orders.takeorder', compact('categories'));
+        }
 public function webhook()
 {
     // This is your Stripe CLI webhook secret for testing your endpoint locally.
@@ -309,4 +293,153 @@ public function webhook()
 
     return response('');
 }
+public function create()
+{
+ //   $items = Item::all(); // Load items for the order creation form
+    $categories = Category::with('items')->get();
+    $menus=Menu::with('items')->get();
+  //  $items=Item::all();
+  $areas = Area::all();
+    $tables = Table::with('area')->where('status', 'available')->get();
+    return view('orders.create', compact('categories','tables','menus','areas'));
+}
+
+public function update(Request $request, Order $order)
+{
+    $request->validate([
+        'user_id' => 'required|integer|exists:clients,id',
+        'order_date' => 'required|date',
+        'status' => 'required|string|in:unpaid,paid,preparing,in_delivery,completed,cancelled',
+        'order_type' => 'required|string',
+        'total_amount' => 'required|numeric',
+        'delivery_address' => 'nullable|string|max:255',
+        'table_id' => 'nullable|integer|exists:tables,id',
+        'payment_method' => 'nullable|string',
+        'stripe_session_id' => 'nullable|string',
+        'items' => 'nullable|array',
+        'items.*.id' => 'required|integer|exists:items,id',
+        'items.*.quantity' => 'required|integer|min:1',
+        'items.*.custom_description' => 'nullable|string',
+    ]);
+
+    $order->update($request->except('items'));
+
+    // Update order items
+    if ($request->has('items')) {
+        $order->items()->sync([]);
+        foreach ($request->input('items') as $item) {
+            $order->items()->attach($item['id'], [
+                'quantity' => $item['quantity'],
+                'custom_description' => $item['custom_description'] ?? '',
+            ]);
+        }
+    }
+
+    return redirect()->route('orders.index')->with('success', 'Order updated successfully.');
+}
+
+/**
+ * Remove the specified order from storage.
+ *a
+ * @param \App\Models\Order $order
+ * @return \Illuminate\Http\RedirectResponse
+ */
+public function destroy(Order $order)
+{
+    $order->delete();
+
+    return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
+}
+public function invoice($id)
+{
+    // Retrieve the order by ID
+    $order = Order::findOrFail($id);
+
+    // Load the view and pass the order data to it
+    $pdf = app(PDF::class);
+
+    // Set custom paper size and margins
+    $pdf->setPaper([0, 0, 250, 350], 'portrait'); // Smaller page size (custom dimensions)
+
+    $pdf->loadView('orders.invoice', compact('order'));
+
+    // Stream the PDF to the browser
+    return $pdf->stream('invoice-' . $id . '.pdf');
+}
+
+public function markAsPreparing(Order $order)
+{
+    if ($order->status === 'paid') {
+        $order->status = 'preparing';
+        $order->save();
+        return redirect()->back()->with('success', 'Order marked as preparing.');
+    }
+    return redirect()->back()->with('error', 'Order cannot be marked as preparing.');
+}
+public function markAsPaid(Order $order)
+{
+    if ($order->status === 'unpaid') {
+        $order->status = 'paid';
+    if(is_null($order->payment_method )){
+        $order->payment_method='Cash';
+    }
+       // dd($order);
+        $order->save();
+        return redirect()->back()->with('success', 'Order marked as paid.');
+    }
+    return redirect()->back()->with('error', 'Order cannot be marked as paid.');
+}
+
+
+public function markAsReady(Order $order)
+{
+    if ($order->status === 'preparing' && $order->order_type === 'pickup' || ($order->order_type === 'dine_in')) {
+        $order->status = 'ready';
+        $order->save();
+        return redirect()->back()->with('success', 'Order marked as ready for pickup.');
+    }
+    return redirect()->back()->with('error', 'Order cannot be marked as ready.');
+}
+
+public function markAsInDelivery(Order $order)
+{
+    if ($order->status === 'preparing' && $order->order_type === 'delivery') {
+        $order->status = 'in_delivery';
+        $order->save();
+        return redirect()->back()->with('success', 'Order marked as in delivery.');
+    }
+    return redirect()->back()->with('error', 'Order cannot be marked as in delivery.');
+}
+
+public function markAsCompleted(Order $order)
+{
+    if ($order->status === 'ready' || $order->status === 'in_delivery') {
+        $order->status = 'completed';
+        $order->save();
+        return redirect()->back()->with('success', 'Order marked as completed.');
+    }
+    return redirect()->back()->with('error', 'Order cannot be marked as completed.');
+}
+
+public function cancelOrder(Order $order)
+{
+    if ($order->status !== 'completed' && $order->status !== 'cancelled') {
+        $order->status = 'cancelled';
+        $order->save();
+        return redirect()->back()->with('success', 'Order has been cancelled.');
+    }
+    return redirect()->back()->with('error', 'Order cannot be cancelled.');
+}
+
+
+
+
+public function ordersReport()
+{
+    // Fetch orders data or any other logic to prepare the report
+    $orders = Order::all(); // This is just an example, adjust as needed
+
+    return view('orders.report', compact('orders'));
+}
+
 } 

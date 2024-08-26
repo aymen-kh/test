@@ -31,8 +31,8 @@ class TableController extends Controller
         ]);
 
         Table::create($request->all());
-
-        return redirect()->route('tables.index')->with('success', 'Table created successfully.');
+        return redirect()->back();
+     //   return redirect()->route('tables.index')->with('success', 'Table created successfully.');
     }
 
     // Display the specified resource

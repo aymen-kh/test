@@ -1,43 +1,56 @@
-@extends('layouts.app')
-
+@extends('layouts.form')
 @section('content')
 <div class="container">
-    <h1 class="text-center mb-4">Our Menus</h1>
+    <form method="POST" action="{{ route('menus.store') }}" enctype="multipart/form-data">
+        @csrf
 
-    <div class="row">
-        @foreach($menus as $menu)
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="menu-card" style="background-image: url('{{ asset('storage/' . $menu->background_image) }}');">
-                    <div class="overlay"></div>
-                    <div class="menu-card-content">
-                    <div class="menu-card-image">
-                        <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }}" class="img-fluid">
-                    </div>
-                    <!-- Menu Content -->
-                    <div class="menu-card-content">
-                        <h5 class="menu-card-title">{{ $menu->name }}</h5>
-                        <p class="menu-card-description">{{ $menu->description }}</p>
-                        <p class="menu-card-price">${{ number_format($menu->price, 2) }}</p>
-                        <p class="menu-card-availability">
-                            <span class="badge {{ $menu->availability ? 'bg-success' : 'bg-danger' }}">
-                                {{ $menu->availability ? 'Available' : 'Not Available' }}
-                            </span>
-                        </p>
+        <!-- Name Field -->
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
+        </div>
 
-                        <!-- Menu Items -->
-                        <h6 class="menu-items-title">Items Included:</h6>
-                        <div class="menu-items">
-                            @foreach($menu->items as $item)
-                                <div class="menu-item">
-                                    <span class="item-name">{{ $item->name }}</span>
-                                    <span class="item-price">${{ number_format($item->price, 2) }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
+        <!-- Price Field -->
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" name="price" id="price" class="form-control" value="{{ old('price') }}" required>
+        </div>
+
+        <!-- Availability Field -->
+        <div class="form-group">
+            <label for="availability">Availability</label>
+            <select name="availability" id="availability" class="form-control">
+                <option value="1" {{ old('availability') == 1 ? 'selected' : '' }}>Available</option>
+                <option value="0" {{ old('availability') == 0 ? 'selected' : '' }}>Not Available</option>
+            </select>
+        </div>
+
+        <!-- Description Field -->
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" class="form-control">{{ old('description') }}</textarea>
+        </div>
+
+        <!-- Image Field -->
+        <div class="form-group">
+            <label for="image">Image</label>
+            <input type="file" name="image" id="image" class="form-control">
+        </div>
+
+        <!-- Items Field -->
+        <div class="form-group">
+            <label for="items">Items</label>
+            <select name="items[]" id="items" class="form-control" multiple>
+                @foreach($items as $item)
+                    <option value="{{ $item->id }}" 
+                        {{ in_array($item->id, old('items', [])) ? 'selected' : '' }}>
+                        {{ $item->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
 </div>
 @endsection

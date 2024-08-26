@@ -14,6 +14,7 @@ class Table extends Model
         'status',
         'capacity',
         'area_id',
+        'updated_at'
         
                 ];
 

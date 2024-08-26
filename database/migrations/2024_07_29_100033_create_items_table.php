@@ -17,7 +17,7 @@ class CreateItemsTable extends Migration
             $table->bigIncrements('id'); // Primary key
             $table->string('name', 255); // Column for name
             $table->tinyInteger('cookingTime')->unsigned()->default(5); // Column for cooking time
-            $table->tinyInteger('availability')->default(1); // Column for availability
+            $table->string('availability')->default('available'); // Column for availability
             $table->decimal('price', 8, 2); // Column for price
             $table->bigInteger('category_id')->unsigned()->nullable(); // Column for category ID
             $table->text('description')->nullable(); // Column for description

@@ -16,9 +16,9 @@ class CategoryController extends Controller
     public function create()
 {
     $categories = Category::all();
-    if ($categories->isEmpty()) {
-        dd('No categories found'); // Debugging: Check if there are no categories
-    }
+    //if ($categories->isEmpty()) {
+      //  dd('No categories found'); // Debugging: Check if there are no categories
+    
     return view('categories.create', compact('categories'));
 }
 
@@ -42,9 +42,9 @@ public function store(Request $request)
 
     public function edit($id)
     {
-        $item = Item::find($id);
-        $categories = Category::all();
-        return view('categories.edit', compact('item', 'categories'));
+        $category = Category::with('items')->findOrFail($id);
+
+        return view('categories.edit', compact('category'));
     }
 
 

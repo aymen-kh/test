@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <meta charset="UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Restaurant Homepage</title>
@@ -25,6 +28,12 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif; /* Set a default font */
+        }
+        .dropdown-menu {
+            transform: translateX(-65%); /* Center align the dropdown */
+            left: 50%; /* Align dropdown to the center of the button */
+            right: auto; /* Override any default right alignment */
+            min-width: 160px; /* Ensure a minimum width for the dropdown */
         }
     
         /* Hero section styles */
@@ -111,20 +120,19 @@
     
 </head>
 <body>
-  <?php  //@dd(auth()->user()) ?> 
- @include('layouts.nav')
+    @include('layouts.nav')
 
     <!-- Hero Section -->
     <header class="hero">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <h1 class="display-4"> <i>Welcome to Roxi</i></h1>
+            <h1 class="display-4"><i>Welcome to Roxi</i></h1>
             <p class="lead">Delicious food and great service in a cozy setting.</p>
-            <a href="{{route('items.index')}}" class="btn btn-light btn-lg">Order Now</a>
+         @cannot('order_edit')   <a href="{{ route('orders.takeorder') }}" class="btn btn-light btn-lg">Order Now</a>@endcannot
         </div>
     </header>
 
-    <div id="x" > 
+    <div id="x">
         @include('menus.index')
     </div>
 
@@ -148,6 +156,7 @@
     @include('layouts.reserve')
 
     <!-- Scripts -->
-   
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

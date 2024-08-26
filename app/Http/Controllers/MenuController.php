@@ -3,26 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
-use App\Models\Type;
+//use App\Models\Type;
 use App\Models\Category;
 use App\Models\Item;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
     public function index()
     {
-        $menus = Menu::all();
+        if (Auth::user()->cannot('order_edit')){
+           
+            $menus = Menu::where('availability', 1)->get();
+
+            return view('menus.index', compact('menus'));
+        }
+       
+        $menus = Menu::All();
+    
+        
+
         return view('menus.index', compact('menus'));
+
     }
+    
 
     public function create()
     {
+        if (Auth::user()->can('menu_edit')){
         $categories = Category::all();
         $items = Item::all();
         return view('menus.create', compact('items'));
     }
-
+    abort('403');
+    }
     public function store(Request $request)
 {
     $validated = $request->validate([
@@ -54,33 +70,51 @@ class MenuController extends Controller
 
     public function show(Menu $menu)
     {
+        if (Auth::user()->hasPermissionTo('menu_edit')){
+
         return view('menus.show', compact('menu'));
     }
-
+    abort('403');
+}
     public function edit(Menu $menu)
     {
+        if (Auth::user()->hasPermissionTo('menu_edit')){
+
         $categories = Category::all();
         $items = Item::all();
         return view('menus.edit', compact('menu', 'categories', 'items'));
     }
-
+    abort('403');
+}
     public function update(Request $request, Menu $menu)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
-            'category_id' => 'required|exists:categories,id',
+            'availability' => 'required|boolean',
             'description' => 'nullable|string',
             'image' => 'nullable|image',
+            'rating' => 'nullable|numeric|min:0|max:10',
             'items' => 'required|array',
             'items.*' => 'exists:items,id',
         ]);
-
+    
+        if ($request->hasFile('image')) {
+            // Remove old image if necessary
+            if ($menu->image) {
+                Storage::delete('public/' . $menu->image);
+            }
+    
+            $imagePath = $request->file('image')->store('images', 'public');
+            $validated['image'] = $imagePath;
+        }
+    
         $menu->update($validated);
-        $menu->items()->sync($request->input('items', [])); // Use input() instead of items
-
+        $menu->items()->sync($request->input('items', [])); // Sync items
+    
         return redirect()->route('menus.index')->with('success', 'Menu updated successfully.');
     }
+    
 
     public function destroy(Menu $menu)
     {

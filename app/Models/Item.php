@@ -65,6 +65,6 @@ class Item extends Model
     // Mutators
     public function setCookingTimeAttribute($value)
     {
-        $this->attributes['cookingTime'] = $value * 60; // convert minutes to seconds
+        $this->attributes['cookingTime'] = $value ; // convert minutes to seconds
     }
 }

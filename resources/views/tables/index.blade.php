@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tables</title>
-</head>
-<body>
+@extends('layouts.form')
+@section("title")tables @endsection
+@section('content')
     <h1>Tables</h1>
     <a href="{{ route('tables.create') }}">Create New Table</a>
     <table border="1">
@@ -36,5 +33,4 @@
             @endforeach
         </tbody>
     </table>
-</body>
-</html>
+    @endsection

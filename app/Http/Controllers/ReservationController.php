@@ -12,17 +12,33 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controllers\Middleware;
 class ReservationController extends Controller
 {
+    public function confirm($id)
+    {
+        // Find the reservation by ID
+        $reservation = Reservation::findOrFail($id);
+        
+        $reservation->status = 'confirmed';
+        $reservation->save();
+
+        return redirect()->route('reservations.index')->with('success', 'Reservation confirmed.');
+    }
+
+    public function cancel($id)
+    {
+       
+        $reservation = Reservation::findOrFail($id);
+        
+        $reservation->status = 'cancelled';
+        $reservation->save();
+
+        return redirect()->route('reservations.index')->with('success', 'Reservation cancelled.');
+    }
     public function __construct()
     {
         
         new Middleware('log', only: ['store']);
     }
-   /* public function reserve()
-    {
-        $tables = Table::all();
-        return view('reservations.create', compact('tables'));
-    }
-*/
+
 public function reserve(Request $request)
 {
     $user=Auth::user();
@@ -70,7 +86,17 @@ public function reserve(Request $request)
 
     public function index()
     {
-        $reservations = Reservation::all();
+        $user = Auth::user();
+        
+        // Check if the user has the 'Client' role
+        if ($user->hasRole(['Client','Chef','Delivrer'])) {
+            // If user is a client, return only their reservations
+            $reservations = $user->reservations()->get();
+        } else {
+            // If user is not a client (e.g., admin), return all reservations
+            $reservations = Reservation::all();
+        }
+        
         return view('reservations.index', compact('reservations'));
     }
 
@@ -99,22 +125,8 @@ public function reserve(Request $request)
         $table = Table::findOrFail($request->table_id);
         if ($request->number_of_guests > $table->capacity) {
             return redirect()->back()->withErrors(['number_of_guests' => 'Number of guests exceeds table capacity.']);
-        }
-
-
-    /*// Check if the user is authenticated
-    if (!Auth::check()) {
-        // Redirect to login page with intended URL
-    //    return redirect()->back()->withInput()->with('url.intended', route('store'));
-      //  return redirect()->route('login')->with('url.intended', url()->full());
-       // return redirect()->route('login')->with('url.intended', URL::previous());
-        //  return redirect()->back()->withInput()->withErrors(['login' => 'You need to login to access this page.']);
-    //  return redirect()->route('login')->with('url.intended', URL::intended(url()->previous()));
-       return redirect()->route('login');
-    }
-/** */
-      
-            $user=Auth::user();
+        } 
+        $user=Auth::user();
         Reservation::create([
             'user_id' =>$user->id,   //Auth::id(), // Use the currently authenticated user
             'table_id' => $request->table_id,
@@ -126,21 +138,28 @@ public function reserve(Request $request)
         ]);
     
     
-        return redirect()->route('items.index')->with('status', 'Reservation created successfully!');
+        return redirect()->route('reservations.index')->with('status', 'Reservation created successfully!');
     }
     
 
     public function show($id)
     {
         $reservation = Reservation::findOrFail($id);
-        return view('reservations.show', compact('reservation'));
+      
+       
+        if ((Auth::user()->hasRole(['Admin', 'Chef','Server']))|| ($reservation->user_id==Auth::user()->id)) {
+        
+            return view('reservations.show', compact('reservation')); }
+    
+        
+         abort(403);
     }
 
     public function edit($id)
     {
         $reservation = Reservation::findOrFail($id);
         $tables = Table::all();
-        return view('reservations.edit', compact('reservation', 'tables'));
+        return view('reservations.edit', compact('reservation','tables'));
     }
 
     public function update(Request $request, $id)

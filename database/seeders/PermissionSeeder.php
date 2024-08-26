@@ -42,8 +42,9 @@ class PermissionSeeder extends Seeder
             'ingredient_show',
             'ingredient_delete',
             'ingredient_access',
-            'meal_create',
+           // 'meal_create',
             'item_edit',
+            'item_create',
             'item_show',
             'item_delete',
             'item_access',
@@ -57,7 +58,42 @@ class PermissionSeeder extends Seeder
             'menu_show',
             'menu_edit',
             'menu_delete',
+            'area_access',
+            'area_create',
+            'area_show',
+            'area_edit',
+            'area_delete',
+            'table_access',
+            'table_create',
+            'table_show',
+            'table_edit',
+            'table_delete',
+            'order_access',
+            'order_create',
+            'order_show',
+            'order_edit',
+            'order_delete',
+            'order_item_access',
+            'order_item_create',
+            'order_item_show',
+            'order_item_edit',
+            'order_item_delete',
+            'category_access',
+            'category_create',
             'category_show',
+            'category_edit',
+            'category_delete',
+            'restaurant_access',
+            'restaurant_create',
+            'restaurant_show',
+            'restaurant_edit',
+            'restaurant_delete'
+            
+
+
+            
+            
+            
         ];
 
         foreach ($permissions as $permission)   {
@@ -67,19 +103,100 @@ class PermissionSeeder extends Seeder
         }
 
         // gets all permissions via Gate::before rule; see AuthServiceProvider
-        Role::create(['name' => 'Super Admin']);
+        Role::create(['name' => 'Admin']);
 
         $role = Role::create(['name' => 'Client']);
 
         $userPermissions = [
+            'menu_access',
+            'menu_show',
+            'category_access',
+            'category_show',
+            'order_access',
+            'order_create',
+            'order_show',
             'reservation_create',
-            'reservation_edit',
             'reservation_show',
             'category_show',
+            'item_show',
+            'item_access',
+
         ];
 
         foreach ($userPermissions as $permission)   {
             $role->givePermissionTo($permission);
         }
+        
+        $role2 = Role::create(['name' => 'Server']);
+
+        $serverPermissions = [
+            'category_access',
+            'category_create',
+            'category_show',
+            'table_access',
+            'table_create',
+            'table_show',
+            'table_edit',
+            'table_delete',
+            'order_access',
+            'order_create',
+            'order_show',
+            'order_edit',
+            'order_delete',
+            'order_item_access',
+            'order_item_create',
+            'order_item_show',
+            'order_item_edit',
+            'order_item_delete',
+            'area_show',
+            'menu_access',
+            'menu_show',
+            'item_show',
+            'item_edit',
+            'item_create',
+            'item_access',
+
+        ];
+
+        foreach ($serverPermissions as $permission)   {
+            $role2->givePermissionTo($permission);
+        }
+        $role3 = Role::create(['name' => 'Chef']);
+
+        $ChefPermissions = [
+            
+            
+            'order_access',
+            'order_show',
+            'order_edit',
+            'order_item_access',
+            'order_item_show',
+            'order_item_edit',
+            'menu_access',
+            'menu_show',
+            'menu_edit',
+            'item_show',
+            'item_edit',
+            'item_access',
+
+        ];
+
+        foreach ($ChefPermissions as $permission)   {
+            $role3->givePermissionTo($permission);
+        }
+
+        $role4 = Role::create(['name' => 'Deliverer']);
+
+        $deliveryPermissions = [    
+            'order_access',
+            'order_show',
+            'order_edit',
+            
+        ];
+
+        foreach ($deliveryPermissions as $permission)   {
+            $role4->givePermissionTo($permission);
+        }
+
     }
 }

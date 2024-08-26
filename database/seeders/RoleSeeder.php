@@ -15,10 +15,11 @@ class RoleSeeder extends Seeder
     {
         //
         
-          //  Role::create(['name' => 'admin']);
-           // Role::create(['name' => 'client']);
-            Role::create(['name' => 'Worker']);
-          //  Role::create(['name' => 'ch']);
+          Role::create(['name' => 'Admin']);
+         Role::create(['name' => 'Server']);
+            Role::create(['name' => 'Deliverer']);
+            Role::create(['name' => 'Chef']);
+         Role::create(['name' => 'Client ']);
           //  Permission::create(['user' => 'edit articles']);
 }
 }

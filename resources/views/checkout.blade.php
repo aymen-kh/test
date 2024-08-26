@@ -9,7 +9,7 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <a class="navbar-brand" href="{{route('items.index')}}">EveryPlate</a>
+            <a class="navbar-brand" href="{{route('items.index')}}"><i>Roxi</i></a>
             <!-- Add more navigation items if needed -->
         </nav>
     </header>

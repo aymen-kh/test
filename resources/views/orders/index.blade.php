@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Document</title>
-    <style>
+@include('layouts.nav')
+@extends('layouts.form')
+@section('content')
+<style>
         /* Container */
         .container {
             max-width: 1200px; /* Limit container width */
@@ -106,11 +101,15 @@
     </style>
     
 </head>
-<body>
-    @include('layouts.nav')
-    <div class="container mt-5">
-        <h1 class="mb-4">My Orders</h1>
 
+
+<body>
+
+    <div class="container mt-5">
+        <h1 class="mb-4">@cannot('order_edit')My @endcan Orders</h1>
+ @can('order_edit')
+            <a href="{{ route('orders.create') }}" class="btn btn-primary">Create Order</a>
+        @endcan
         @if($orders->isEmpty())
             <p>You have no orders yet.</p>
         @else
@@ -130,34 +129,67 @@
                     </thead>
                     <tbody>
                         @foreach($orders as $order)
-                            <tr>
-                                <td>{{ $order->id }}</td>
+                            <tr>   <td>{{ $order->id }}</td> 
                                 <td>{{ $order->order_date }}</td>
                                 <td>
-                                    @if($order->status == 'unpaid')
-                                        <button class="btn btn-pay btn-sm">Pay Now</button>
-                                    @elseif($order->status == 'paid')
-                                        <a href="{{ route('orders.index', $order->id) }}" class="btn btn-warning btn-sm">Mark as Preparing</a>
-                                        <a href="{{ route('orders.index', $order->id) }}" class="btn btn-danger btn-sm">Cancel Order</a>
-                                    @elseif($order->status == 'preparing')
-                                        <a href="{{ route('orders.index', $order->id) }}" class="btn btn-primary btn-sm">Mark as In Delivery</a>
-                                    @elseif($order->status == 'in_delivery')
-                                        <span class="status-in_delivery">In Delivery</span>
-                                    @elseif($order->status == 'completed')
-                                        <span class="status-completed">Completed</span>
-                                    @elseif($order->status == 'cancelled')
-                                        <span class="status-cancelled">Cancelled</span>
-                                    @endif
+                                    @can('order_edit')
+    @if($order->status == 'unpaid')
+        <button class="btn btn-pay btn-sm">Pay Now</button>
+    @elseif($order->status == 'paid')
+        <a href="{{ route('orders.markAsPreparing', $order->id) }}" class="btn btn-warning btn-sm">Mark as Preparing</a>
+        <a href="{{ route('orders.cancelOrder', $order->id) }}" class="btn btn-danger btn-sm">Cancel Order</a>
+    @elseif($order->status == 'preparing' && ($order->order_type ==='pickup'|| $order->order_type ==='dine_in' ))
+        <a href="{{ route('orders.markAsReady', $order->id) }}" class="btn btn-primary btn-sm">Mark as Ready</a>
+    @elseif($order->status == 'preparing' && $order->order_type === 'delivery')
+        <a href="{{ route('orders.markAsInDelivery', $order->id) }}" class="btn btn-primary btn-sm">Mark as In Delivery</a>
+    @elseif($order->status == 'ready' || $order->status == 'in_delivery')
+        <a href="{{ route('orders.markAsCompleted', $order->id) }}" class="btn btn-success btn-sm">Mark as Completed</a>
+    @elseif($order->status == 'completed')
+        <span class="status-completed">Completed</span>
+    @elseif($order->status == 'cancelled')
+        <span class="status-cancelled">Cancelled</span>
+    
+@endcan
+
+                     @else               
+                           
+                                        <!-- Display status without buttons for non-authorized users -->
+                                        @if($order->status == 'unpaid')
+                                            <span class="status-unpaid">Unpaid</span>
+                                        @elseif($order->status == 'paid')
+                                            <span class="status-paid">Paid</span>
+                                            @elseif($order->status == 'ready')
+                                            <span class="status-paid">Ready</span>
+                                        @elseif($order->status == 'preparing')
+                                            <span class="status-preparing">Preparing</span>
+                                        @elseif($order->status == 'in_delivery')
+                                            <span class="status-in_delivery">In Delivery</span>
+                                        @elseif($order->status == 'completed')
+                                            <span class="status-completed">Completed</span>
+                                        @elseif($order->status == 'cancelled')
+                                            <span class="status-cancelled">Cancelled</span>
+                                        @endif
+                               
+                                    @endif             
+                                    
                                 </td>
+                                
                                 
                                 <td>${{ number_format($order->total_amount, 2) }}</td>
                                 <td>{{ $order->order_type }}</td>
-                                <td>{{ $order->delivery_address }}</td>
                                 <td>
+                                   @can('order_edit') <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($order->delivery_address) }}" target="_blank">
+                                     @endcan   {{ $order->delivery_address }}
+                                    </a>
+                                </td>                                <td>
                                     @if($order->status == 'unpaid')
-                                       <button class="btn btn-pay btn-sm grey">
-                                        Pay Now
-                                    </button>
+                                      @cannot('order_edit')
+                                    <a class="btn btn-primary" href="{{route('orders.markAsPaid',$order->id)}}"> Pay Now</a>   
+                                     @endcannot
+
+                                      @can('order_edit')
+                                    <a class="btn btn-primary" href="{{route('orders.markAsPaid',$order->id)}}"> Mark as Paid</a>   
+                                     @endcannot
                                      
                                     @else
                                         {{ $order->payment_method }}
@@ -165,6 +197,9 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info btn-sm">View Details</a>
+                                    @can('item_edit')
+                                    <a href="{{ route('orders.invoice', $order->id) }}" class="btn btn-primary btn-sm" target="_blank">Print Invoice</a>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -177,8 +212,6 @@
     @include('layouts.reserve')
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+ 
 </body>
 </html>

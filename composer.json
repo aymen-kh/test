@@ -6,9 +6,16 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.0",
         "binafy/laravel-cart": "^1.0",
+        "endroid/qr-code": "^5.0",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
+
+
+
+
+        "picqer/php-barcode-generator": "^2.4",
         "spatie/laravel-permission": "^6.9",
         "stripe/stripe-php": "^15.5"
     },

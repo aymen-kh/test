@@ -54,6 +54,7 @@ class AreaController extends Controller
     // Show the form for editing the specified resource
     public function edit(Area $area)
     {
+        
         return view('areas.edit', compact('area'));
     }
 
