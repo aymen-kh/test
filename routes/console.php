@@ -12,6 +12,7 @@ $scheduleConfig = [
 foreach ($scheduleConfig as $command => $frequency) {
     Schedule::command($command)->{$frequency}()->runInBackground();
 }
+
 //Schedule::command('tables:update-status')->everyFifteenMinutes();
 //Schedule::command('orders:archive')->weekly();
 Artisan::command('inspire', function () {
