@@ -45,28 +45,41 @@ public function reserve(Request $request)
     // Get form data if any
     $number_of_guests = $request->input('numPeople', 1); // Default to 1 if not provided
     $date = $request->input('date', today()->toDateString()); // Default to today's date if not provided
+
     $time = $request->input('time', null); // No default time
+    
+
     $event = $request->input('eventType', 'null'); // 
    // $startTime = $request->input('time', '00:00:00'); // Default to midnight if not provided
    // $endTime = $request->input('end_time', '23:59:59'); // Default to end of the day if not provided
 
     $startTime = Carbon::parse("$date $time");
    // $formattedDateTime = $startTime->format('Y-m-d H:i:s');
-
+  
     $endTime = $startTime->copy()->addHours(2); 
+    //dd($endTime);
+    if ($endTime->isSameDay(today())) {
 
+        $availableTablesWithAreas = Table::with('area')
+        ->where('status', 'available')
+        ->get();
+
+    };
     $availableTablesWithAreas = Table::with('area')
-    ->where('status', 'available')
+    
+  //  ->where('status', 'available')
         ->whereNotIn('id', function ($query) use ($number_of_guests, $startTime, $endTime) {
             $query->select('table_id')
                   ->from('reservations')
                   //->where('event_date', $date)
                   ->where(function ($query) use ($startTime, $endTime,$number_of_guests) {
-                   $query  ->where('event_date', '>', $startTime)
-                            ->where('end_time', '<', $endTime)
-                            ->where('number_of_guests','<',(int)$number_of_guests);
+                   $query  ->where('event_date', '>=', $startTime)
+                            ->where('end_time', '<=', $endTime);
+                
+                           // ->where('number_of_guests','<',(int)$number_of_guests);
                   });
         })
+        ->where('capacity','>=',$number_of_guests)
         ->get();
         
      // Get only table_id column   

@@ -71,11 +71,13 @@ Route::middleware('permission:order_edit')->group(function () {
   Route::get('orders/{order}/cancel', [OrderController::class, 'cancelOrder'])->name('orders.cancelOrder');
  });
   
-Route::resource('menus', MenuController::class);
+   Route::resource('menus', MenuController::class);
   
    Route::resource('reservations', ReservationController::class);
 });
-Route::get('/menus',[MenuController::class,'index'])->name('menus.index');
+
+
+
 
 Route::get('reservation/create2',[ReservationController::class,'reserve'])->name('reservations.create2');
 Route::get('/dashboard', function () {
@@ -87,17 +89,9 @@ require __DIR__.'/auth.php';
 
 
 Route::get('/order',[OrderController::class, 'clientorder'])->name('orders.takeorder');
-
+Route::get('/menus',[MenuController::class,'index'])->name('menus.index');
 
 Route::get('/home', function () {
    return view('welcom');
 })->name('welcom');
-use Illuminate\Support\Facades\Artisan;
 
-Route::get('/clear-all-caches', function() {
-   Artisan::call('route:clear');
-   Artisan::call('config:clear');
-   Artisan::call('cache:clear');
-   Artisan::call('view:clear');
-   return "All caches cleared!";
-});

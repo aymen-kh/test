@@ -127,23 +127,48 @@
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <h1 class="display-4"><i>Welcome to Roxi</i></h1>
-            <p class="lead">Delicious food and great service in a cozy setting.</p>
+            <p class="lead">{{$restaurants->description}}</p>
             @cannot('order_edit')   <a href="{{ route('orders.takeorder') }}" class="btn btn-light btn-lg">Order Now</a>@endcannot
             @role('Admin')   <a href="{{ route('orders.takeorder') }}" class="btn btn-light btn-lg">Order Now</a>@endrole
         </div>
     </header>
-
-    <div id="x">
+    <div class=" bg-light py-5" id="x">
         @include('menus.index')
     </div>
-
     <!-- About Section -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center">About Us</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque imperdiet, nulla id iaculis vestibulum, arcu arcu laoreet erat, non tincidunt sapien justo nec erat. Duis vitae urna vel purus cursus condimentum.</p>
+    <!-- About Section -->
+    <section class="py-5 bg-light">
+        <div class="container" id="abt">
+            <div class="row">
+                <!-- Image beside the story -->
+                <div class="col-md-6">
+                    <img src="{{asset('images/chef.jpeg')}}" alt="Our Story" class="img-fluid rounded shadow" style="max-height: 400px; object-fit: cover;">
+                </div>
+                <div class="col-md-6 d-flex flex-column justify-content-center">
+                    <h4 class="text-primary mb-3">Our Story</h4>
+                    <p style="font-size: 1.1rem; line-height: 1.6;">
+                        Founded in 2020, Roxi started with a passion for bringing people together over delicious meals. What began as a small family-run establishment has grown into a beloved community hub, known for our warm atmosphere and dedication to high-quality ingredients. Every dish we serve tells the story of our journey, blending tradition with innovation to create unforgettable dining experiences.
+                    </p>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <h4 class="text-primary mb-3">Contact Information</h4>
+                    <p style="font-size: 1.1rem;"><strong>Phone:</strong> {{ $restaurants->phone }}</p>
+                    <p style="font-size: 1.1rem;"><strong>Mail:</strong> {{ $restaurants->email }}</p>
+                    <p style="font-size: 1.1rem;"><strong>Location:</strong> {{ $restaurants->address }}</p>
+                    <h5 class="mt-4 text-primary">Open Days</h5>
+                    <ul style="font-size: 1.1rem;">
+                        <li>{{ $restaurants->open_days }}: {{ $restaurants->open_time }} - {{ $restaurants->close_time }}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <img src="{{asset('images/r.jpg')}}" alt="Contact Us" class="img-fluid rounded shadow" style="max-height: 250px; object-fit: cover;">
+                </div>
+            </div>
         </div>
     </section>
+    
 
     <!-- Footer -->
     <footer class="text-center">

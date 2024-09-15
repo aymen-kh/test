@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Menu;
+use App\Models\Restaurant;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Gate;
@@ -29,5 +30,6 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasRole('Admin') ? true : null;
         });
         View::share('menus', Menu::all());
+        View::share('restaurants', Restaurant::first());
     }
 }

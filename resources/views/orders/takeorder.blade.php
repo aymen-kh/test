@@ -183,9 +183,68 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" defer></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" defer></script>
+    
+   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+     
+     
+     
+   <script src="https://unpkg.com/leaflet.pinsearch@1.0.5/src/Leaflet.PinSearch.js" crossorigin=""></script>
+
     <script>
           var selectedLocation = null;
-        document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener('DOMContentLoaded', function () {
+    // Initialize the map
+    var map = L.map('map').setView([33, 9.5], 10);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var marker; // declare a global variable to store the marker
+
+    // Update location when the user clicks on the map
+    map.on('click', function (event) {
+        var lat = event.latlng.lat;
+        var lng = event.latlng.lng;
+
+        // Remove existing marker if any
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        // Add a new marker to the map at the clicked location
+        marker = L.marker([lat, lng], {
+            title: 'Chosen place'
+        }).addTo(map);
+
+        // Fetch address from lat and lon
+        var url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                var address = data.display_name;
+                console.log('Address:', address);
+                selectedLocation = address;
+
+                // Update the hidden input field with the selected location
+                document.getElementById('delivery-location-input').value = selectedLocation;
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    // Ensure the form input is updated and the form submits correctly
+    const checkoutForm = document.getElementById('checkout-form');
+    checkoutForm.addEventListener('submit', function (e) {
+        if (!selectedLocation) {
+            e.preventDefault(); // Stop form submission if location is not selected
+            alert("Please select a delivery location on the map.");
+        } else {
+            // Update the hidden input with the selected location before submitting
+            document.getElementById('delivery-location-input').value = selectedLocation;
+        }
+    });
+});
+
             function updateTotalPrice() {
                 const price = parseFloat(document.querySelector('#item-modal-price').dataset.price);
                 const quantity = parseInt(document.querySelector('#item-quantity').value);
@@ -220,11 +279,12 @@
                     cartDropdown.innerHTML += `
                     <form action="{{ route('order.process') }}" method="post">
                         @csrf
-
+                          <input type="hidden" name="delivery_location" id="delivery-location-input">
                         <button type="submit" class="dropdown-item primary-button">Checkout</button>
                     </form>
                 `;
                 }
+      
             }
             document.getElementById('search-input').addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase(); // Get the current input value and convert to lowercase
@@ -305,8 +365,7 @@
                 const itemCustomDescription = document.querySelector('#item-custom-description').value;
                 const orderType = document.querySelector('#order-type').value; 
                 const location = selectedLocation; // Get the selected order type
-                
-
+       
                 let cart = JSON.parse(getCookie('cart') || '[]');
                 cart.push({
                     id: itemId,
@@ -335,56 +394,12 @@
             
             // Initialize cart on page load
             updateCart();
-        });
+    
      
     </script>
-      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-      <script src="https://unpkg.com/leaflet.pinsearch@1.0.5/src/Leaflet.PinSearch.js" crossorigin=""></script>
-      <script>
-           document.querySelector('#order-type').addEventListener('change', function() {
-        if (this.value === 'delivery') {
-            document.getElementById('map').style.display = 'block';
-            map.invalidateSize();
-        } else {
-            document.getElementById('map').style.display = 'none';
-        }
-    });
-        var map = L.map('map').setView([33, 9.5], 10);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-      
-        var marker; // declare a global variable to store the marker
-      
-        map.on('click', function(event) {
-          var lat = event.latlng.lat;
-          var lng = event.latlng.lng;
-          console.log('Clicked on:', lat, lng);
-      
-          // Remove any existing marker
-          if (marker) {
-            map.removeLayer(marker);
-          }
-      
-          // Add a new marker to the map at the clicked location
-          marker = L.marker([lat, lng], {
-            title: 'Chosen place'
-          }).addTo(map);
-          var url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1';
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      var address = data.display_name;
-      console.log('Address:', address);
-      selectedLocation = address;
-      
-    })
-    .catch(error => console.error('Error:', error));
-          //selectedLocation = `${lat},${lng}`;
-          
-        });
-      </script>
+   
+
+
 
 </body>
 </html> 

@@ -363,4 +363,3 @@
 
     </script>
 @endcan
-<?php abort('403') ?>

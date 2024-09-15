@@ -14,12 +14,13 @@ class MenuController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->cannot('order_edit')){
+        if ($user=Auth::user()){
+       if ($user ->cannot('order_edit')){
            
             $menus = Menu::where('availability', 1)->get();
 
             return view('menus.index', compact('menus'));
-        }
+        }}
        
         $menus = Menu::All();
     
@@ -70,7 +71,7 @@ class MenuController extends Controller
 
     public function show(Menu $menu)
     {
-        if (Auth::user()->hasPermissionTo('menu_edit')){
+        if (Auth::user()->can('menu_edit')){
 
         return view('menus.show', compact('menu'));
     }
@@ -78,7 +79,7 @@ class MenuController extends Controller
 }
     public function edit(Menu $menu)
     {
-        if (Auth::user()->hasPermissionTo('menu_edit')){
+        if (Auth::user()->can('menu_edit')){
 
         $categories = Category::all();
         $items = Item::all();

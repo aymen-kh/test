@@ -61,7 +61,7 @@
 
 <body>
     <h2><i>welcome to Roxi</i></h2>
-    <h3>#{{ $order->id }}_{{$order->client_id}}</h3>
+    <h3>#{{ $order->id }}_{{$order->user_id}}</h3>
     <h5>Date: {{ $order->order_date }}</h5>
    
     @if ($order->delivery_address)

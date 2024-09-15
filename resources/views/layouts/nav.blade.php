@@ -8,8 +8,18 @@
             <li class="nav-item active">
                 <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
             </li>
+           
+
             <li class="nav-item">
                 <a class="nav-link" href="{{route('menus.index')}}">Menus</a>
+            </li>
+            <li  class="nav-item" >
+                @if (Request::is('/') || Request::is('home'))
+                <a class="nav-link" href="#abt">About Us <span class="sr-only">(current)</span></a>
+
+            
+            @endif
+              
             </li>
            @cannot('order_edit')
             <li class="nav-item">
@@ -61,11 +71,13 @@
                     <div class="dropdown-menu" aria-labelledby="profileDropdown">
                         <a class="dropdown-item" href="{{ route('orders.index') }}">@cannot('order_edit')My @endcannot Orders</a>
                         @can('reservation_show')
-                        <a class="dropdown-item" href="{{ route('reservations.index') }}">My Reservations</a>
-                    @endcan
-                    
-                    @can('table_edit')
-                        <a class="dropdown-item" href="{{ route('reservations.index') }}">@cannot('table_edit') My @endcannot Reservations</a>
+                        <a class="dropdown-item" href="{{ route('reservations.index') }}">
+                            @can('table_edit')
+                                Reservations
+                            @else
+                                My Reservations
+                            @endcan
+                        </a>
                     @endcan
                     
                         <a class="dropdown-item" href="{{ route('profile.edit') }}">Edit Profile</a>

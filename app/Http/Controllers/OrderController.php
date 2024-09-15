@@ -72,7 +72,9 @@ class OrderController extends Controller
         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
 
         $cartItems = json_decode($_COOKIE['cart'] ?? '[]', true);
-    
+       // $deliveryLocation = $cartItems['location'] ?? null;
+        //dd($request->delivery_location);
+       // dd($cartItems);
       //  return view('checkout1', compact('cartItems'));
      $lineItems = [];
         $totalPrice = 0;
@@ -87,7 +89,7 @@ class OrderController extends Controller
                       
                      //   'images' => [$product->image]
                     ],
-                    'unit_amount' => $product['price']*20,
+                    'unit_amount' => ($product['price']*100)/$product['quantity'],
                 ],
                 'quantity' => $product['quantity'],
                 
@@ -119,7 +121,7 @@ class OrderController extends Controller
         $order->total_amount = $totalPrice;
         $order->payment_method='card';
         $order->order_type=$cartItems[0]['order_type'];
-        $order->delivery_address = $cartItems[0]["location"];
+        $order->delivery_address = $request->delivery_location;
         $order->user_id=$user->id;
         $order->stripe_session_id = $session->id;
         $order->save(); 
@@ -227,9 +229,11 @@ public function success(Request $request)
                 }
             }
             if (Auth::user()->hasRole(['Server','Admin'])) {
-                $pdf = app(PDF::class);
-                $pdf->loadView('orders.invoice', compact('order'));
-        
+            //    $pdf = app(PDF::class);
+               // $pdf->loadView('orders.invoice', compact('order'));
+                $pdf = Pdf::loadView('orders.invoice', compact('order'))
+                ->setPaper([0, 0, 250, 350], 'portrait'); // Smaller page size (custom dimensions)
+  
                 // Generate the PDF content as a stream
                 $pdfContent = $pdf->output();
                 
@@ -356,12 +360,14 @@ public function invoice($id)
     $order = Order::findOrFail($id);
 
     // Load the view and pass the order data to it
-    $pdf = app(PDF::class);
+   // $pdf = app(Pdf::class);
 
     // Set custom paper size and margins
-    $pdf->setPaper([0, 0, 250, 350], 'portrait'); // Smaller page size (custom dimensions)
+  //  $pdf->setPaper([0, 0, 250, 350], 'portrait'); // Smaller page size (custom dimensions)
 
-    $pdf->loadView('orders.invoice', compact('order'));
+   // $pdf->loadView('orders.invoice', compact('order'));
+   $pdf = Pdf::loadView('orders.invoice', compact('order'))
+              ->setPaper([0, 0, 250, 350], 'portrait'); // Smaller page size (custom dimensions)
 
     // Stream the PDF to the browser
     return $pdf->stream('invoice-' . $id . '.pdf');
