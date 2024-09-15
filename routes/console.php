@@ -1,8 +1,12 @@
 <?php
+ 
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+
+
+
 $scheduleConfig = [
     'tables:update-status' => 'everyFifteenMinutes',
     'orders:archive' => 'weekly',

@@ -86,13 +86,18 @@ Route::get('/dashboard', function () {
 require __DIR__.'/auth.php';
 
 
+
 Route::get('/order',[OrderController::class, 'clientorder'])->name('orders.takeorder');
+
 
 
 Route::get('/home', function () {
    return view('welcom');
 })->name('welcom');
 use Illuminate\Support\Facades\Artisan;
+
+
+
 
 Route::get('/clear-all-caches', function() {
    Artisan::call('route:clear');

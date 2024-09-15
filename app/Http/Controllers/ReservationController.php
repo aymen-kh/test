@@ -97,6 +97,9 @@ public function reserve(Request $request)
     ]);
 }
 
+
+
+
     public function index()
     {
         $user = Auth::user();
